@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Project;
 use Illuminate\Http\Request;
 
 class ProjectController extends Controller
@@ -12,7 +13,13 @@ class ProjectController extends Controller
      */
     public function index()
     {
-        //
+        $projects = Project::where('published', '1')->orderBy('updated_at', 'DESC')->get();
+
+        foreach ($projects as $project) {
+            if ($project->project_img) $project->project_img = url($project->project_img);
+        }
+
+        return response()->json($projects);
     }
 
     /**
