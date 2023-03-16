@@ -66,6 +66,6 @@ class ProjectController extends Controller
 
         $projects = Project::where('type_id', $id)->orderBy('updated_at', 'DESC')->with('type')->paginate(10);
 
-        return response()->json($projects);
+        return response()->json(compact('projects', 'type'));
     }
 }
