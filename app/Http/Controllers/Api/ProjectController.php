@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Project;
+use App\Models\Type;
 use Illuminate\Http\Request;
 
 class ProjectController extends Controller
@@ -56,5 +57,15 @@ class ProjectController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function projectsForType(string $id)
+    {
+        $type = Type::find($id);
+        if (!$type) return response(null, 404);
+
+        $projects = Project::where('type_id', $id)->orderBy('updated_at', 'DESC')->with('type')->paginate(10);
+
+        return response()->json($projects);
     }
 }
