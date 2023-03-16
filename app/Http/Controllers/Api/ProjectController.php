@@ -13,7 +13,7 @@ class ProjectController extends Controller
      */
     public function index()
     {
-        $projects = Project::where('published', '1')->orderBy('updated_at', 'DESC')->get();
+        $projects = Project::where('published', '1')->orderBy('updated_at', 'DESC')->with('type')->paginate(10);
 
         foreach ($projects as $project) {
             if ($project->project_img) $project->project_img = url($project->project_img);
@@ -35,7 +35,10 @@ class ProjectController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $project = Project::with('type')->find($id);
+        if (!$project) return response(null, 404);
+
+        return response()->json($project);
     }
 
     /**
