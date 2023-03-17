@@ -5,10 +5,13 @@ namespace App\Http\Controllers\Admin;
 use App\Models\Project;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Mail\ChangesInProjects;
 use App\Models\Technology;
 use App\Models\Type;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 
@@ -54,6 +57,10 @@ class ProjectController extends Controller
         $data['published'] = Arr::exists($data, 'published') ? 1 : 0;
         $project->fill($data);
         $project->save();
+        if ($project->published) {
+            $this->sendChangesInProjectsEmail($project, 'creato');
+        }
+
         if (Arr::exists($data, 'technologies')) $project->technologies()->attach($data['technologies']);
 
         return to_route('admin.projects.show', $project->id)->with('msg', "Il progetto $project->name è stato aggiunto correttamente.")->with('type', 'success');
@@ -92,6 +99,9 @@ class ProjectController extends Controller
         $data['published'] = Arr::exists($data, 'published') ? 1 : 0;
         $project->fill($data);
         $project->save();
+        if ($project->published) {
+            $this->sendChangesInProjectsEmail($project, 'modificato');
+        }
         if (Arr::exists($data, 'technologies')) $project->technologies()->sync($data['technologies']);
         else if (count($project->technologies)) $project->technologies()->detach();
 
@@ -128,5 +138,12 @@ class ProjectController extends Controller
             'technologies.exists' => 'Il tipo di tecnologia inserita non è valido',
 
         ]);
+    }
+
+    private function sendChangesInProjectsEmail(Project $project, $changes_type)
+    {
+        $email = new ChangesInProjects($project, $changes_type);
+        $user_email = Auth::user()->email;
+        Mail::to($user_email)->send($email);
     }
 }
