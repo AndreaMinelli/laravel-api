@@ -45,24 +45,7 @@ class ProjectController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string',
-            'project_img' => 'nullable|image',
-            'description' => 'required|string',
-            'project_link' => 'required|url',
-            'type_id' => 'nullable|exists:types,id',
-            'technologies' => 'nullable|exists:technologies,id'
-
-        ], [
-            'name.required' => 'Devi inserire un nome valido!',
-            'description.required' => 'Devi inserire una descrizione!',
-            'project_img.image' => 'Il file caricato deve essere un\'immagine.',
-            'project_link.required' => 'Devi inserire un link valido!',
-            'project_link.url' => 'Il link del progetto non è valido.',
-            'type_id.exists' => 'Il tipo di progetto inserito non è valido',
-            'technologies.exists' => 'Il tipo di tecnologia inserita non è valido',
-
-        ]);
+        $this->formsValidation($request);
         $data = $request->all();
         $project = new Project();
         if (Arr::exists($data, 'project_img')) {
@@ -100,21 +83,7 @@ class ProjectController extends Controller
      */
     public function update(Request $request, Project $project)
     {
-        $request->validate([
-            'name' => 'required|string',
-            'project_img' => 'nullable|image',
-            'description' => 'required|string',
-            'project_link' => 'required|url',
-            'type_id' => 'nullable|exists:types,id',
-            'technologies' => 'nullable|exists:technologies,id'
-        ], [
-            'name.required' => 'Devi inserire un nome valido!',
-            'description.required' => 'Devi inserire una descrizione!',
-            'project_img.image' => 'Il file caricato deve essere un\'immagine.',
-            'project_link.required' => 'Devi inserire un link valido!',
-            'type_id.exists' => 'Il tipo di progetto inserito non è valido',
-            'technologies.exists' => 'Il tipo di tecnologia inserita non è valido',
-        ]);
+        $this->formsValidation($request);
         $data = $request->all();
         if (Arr::exists($data, 'project_img')) {
             if ($project->project_img) Storage::delete($project->project_img);
@@ -137,5 +106,27 @@ class ProjectController extends Controller
         if ($project->project_img) Storage::delete($project->project_img);
         $project->delete();
         return to_route('admin.projects.index')->with('msg', "Il progetto $project->name è stato eliminato.")->with('type', 'danger');
+    }
+
+    private function formsValidation(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string',
+            'project_img' => 'nullable|image',
+            'description' => 'required|string',
+            'project_link' => 'required|url',
+            'type_id' => 'nullable|exists:types,id',
+            'technologies' => 'nullable|exists:technologies,id'
+
+        ], [
+            'name.required' => 'Devi inserire un nome valido!',
+            'description.required' => 'Devi inserire una descrizione!',
+            'project_img.image' => 'Il file caricato deve essere un\'immagine.',
+            'project_link.required' => 'Devi inserire un link valido!',
+            'project_link.url' => 'Il link del progetto non è valido.',
+            'type_id.exists' => 'Il tipo di progetto inserito non è valido',
+            'technologies.exists' => 'Il tipo di tecnologia inserita non è valido',
+
+        ]);
     }
 }
